@@ -1,0 +1,53 @@
+name: Linux build
+# Builds the .deb and the tarball for Linux Mint (XFCE) and other Debian/Ubuntu desktops.
+#   - every push / pull request: build, test, smoke-test the .deb
+#   - push a tag like v0.13.1: also publishes a GitHub Release with the packages
+#   - "Run workflow" button: build only, packages are in the run's Artifacts
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    # Ubuntu 22.04 = glibc 2.35, so the result runs on Linux Mint 21.x and 22.x
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install test tools
+        run: sudo apt-get update && sudo apt-get install -y fonts-dejavu-core xvfb xdotool x11-utils
+      - run: cargo build --release
+      - run: cargo test --release
+      - name: Build packages
+        run: |
+          VER="${GITHUB_REF_NAME}"
+          case "$GITHUB_REF" in refs/tags/v*) ;; *) VER="0.0.0-ci" ;; esac
+          packaging/linux/package.sh "$VER"
+      - name: Smoke test (install the .deb, run --doctor, start it, uninstall)
+        run: |
+          sudo apt-get install -y ./packaging/linux/out/nock_*_amd64.deb
+          test -x /usr/bin/nock
+          nock --doctor
+          code=0
+          xvfb-run -a timeout 6 nock || code=$?
+          test "$code" = 124 || { echo "nock exited early with $code"; exit 1; }
+          sudo apt-get remove -y nock
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nock-linux
+          path: packaging/linux/out/*
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            packaging/linux/out/nock_*_amd64.deb
+            packaging/linux/out/nock-*-x86_64-linux.tar.gz
+          generate_release_notes: true
