@@ -1,0 +1,78 @@
+[package]
+name = "nock"
+version = "0.13.0"
+edition = "2021"
+description = "A tiny native notch and top bar for Windows, written in Rust"
+
+[features]
+default = ["media"]
+# Now-playing via the Windows media session API (SMTC). Needs the WinRT bindings.
+media = [
+  "windows/Media_Control",
+  "windows/Storage_Streams",
+  "windows/Foundation",
+  "windows/Foundation_Collections",
+  "windows/Devices_Radios","windows/Devices_Bluetooth","windows/Devices_Enumeration",
+]
+
+[target.'cfg(windows)'.dependencies]
+windows-numerics = "0.3"
+windows-core = "0.62"
+windows = { version = "0.62.2", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Direct2D",
+  "Win32_Graphics_Direct2D_Common",
+  "Win32_Graphics_Dwm",
+  "Win32_Media",
+  "Win32_Graphics_DirectWrite",
+  "Win32_Graphics_Dxgi_Common",
+  "Win32_Graphics_Gdi",
+  "Win32_Graphics_Imaging",
+  "Win32_Media_Audio",
+  "Win32_Media_Audio_Endpoints",
+  "Win32_Storage_FileSystem",
+  "Win32_Security",
+  "Win32_System_Com",
+  "Win32_System_Com_StructuredStorage",
+  "Win32_System_Variant",
+  "Win32_System_DataExchange",
+  "Win32_System_Diagnostics_Debug",
+  "Win32_System_LibraryLoader",
+  "Win32_System_Memory",
+  "Win32_System_Ole",
+  "Win32_System_Registry",
+  "Win32_System_SystemServices",
+  "Win32_System_Shutdown",
+  "Win32_System_SystemInformation",
+  "Win32_System_Threading",
+  "Win32_System_Power",
+  "Win32_Devices_Bluetooth",
+  "Win32_System_IO",
+  "Win32_UI_Accessibility",
+  "Win32_UI_HiDpi",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_UI_Shell",
+  "Win32_UI_Shell_Common",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[target.'cfg(not(windows))'.dependencies]
+tiny-skia = "0.11"
+fontdue = "0.9"
+libc = "0.2"
+zbus = "5"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+arboard = { version = "3", default-features = false }
+winit = "0.30"
+softbuffer = "0.4"
+x11rb = "0.13"
+
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
