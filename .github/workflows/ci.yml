@@ -49,7 +49,7 @@ jobs:
       - run: cargo build --release
       - run: cargo test --release
       - name: Build packages
-        run: packaging/linux/package.sh 0.0.0-ci
+        run: bash packaging/linux/package.sh 0.0.0-ci
       - name: Package smoke test (install the .deb, start it, uninstall)
         run: |
           sudo apt-get install -y ./packaging/linux/out/nock_0.0.0-ci_amd64.deb

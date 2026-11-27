@@ -29,7 +29,7 @@ jobs:
         run: |
           VER="${GITHUB_REF_NAME}"
           case "$GITHUB_REF" in refs/tags/v*) ;; *) VER="0.0.0-ci" ;; esac
-          packaging/linux/package.sh "$VER"
+          bash packaging/linux/package.sh "$VER"
       - name: Smoke test (install the .deb, run --doctor, start it, uninstall)
         run: |
           sudo apt-get install -y ./packaging/linux/out/nock_*_amd64.deb
