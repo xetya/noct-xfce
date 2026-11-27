@@ -16,6 +16,8 @@ use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use winit::window::Window;
 use x11rb::connection::Connection;
 use x11rb::protocol::xproto::{AtomEnum, ConnectionExt, PropMode};
+// provides change_property32 (a different trait from the xproto one above)
+use x11rb::wrapper::ConnectionExt as _;
 
 /// True when there is no compositor and alpha must be flattened.
 pub static OPAQUE: AtomicBool = AtomicBool::new(false);
